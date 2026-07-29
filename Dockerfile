@@ -4,4 +4,4 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 EXPOSE 80
-CMD ["gunicorn", "server:app", "-b", "0.0.0.0:8080"]
+CMD ["gunicorn", "server:app", "-b", "0.0.0.0:80"]
