@@ -1,0 +1,28 @@
+{
+  "name": "booklist-cn",
+  "version": "1.0.0",
+  "description": "读书会图书搜索投票应用 - 中国版",
+  "main": "index.main",
+  "dependencies": {},
+  "cloudfunction": {
+    "name": "booklist-api",
+    "runtime": "Python3.10",
+    "handler": "index.handler",
+    "code": "./scf",
+    "memorySize": 256,
+    "timeout": 30,
+    "environment": {
+      "Variables": []
+    },
+    "apigetway": {
+      "serviceName": "booklist-api",
+      "apiId": "",
+      "customDomain": "",
+      "auth": false
+    }
+  },
+  "hosting": {
+    "staticDir": "./static",
+    "index": "index.html"
+  }
+}

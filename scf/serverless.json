@@ -1,0 +1,11 @@
+{
+  "name": "booklist-cn",
+  "function": "booklist-api",
+  "runtime": "Python3.10",
+  "handler": "index.handler",
+  "memorySize": 256,
+  "timeout": 30,
+  "environmentVariables": [],
+  "description": "读书会图书搜索服务 - 中国版",
+  "tags": ["booklist", "reading", "vote"]
+}
