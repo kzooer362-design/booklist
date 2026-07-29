@@ -1493,8 +1493,9 @@ def search_books():
     各字段击中一个源即可使用，不必强求一个源给全所有信息。
     """
     query = request.args.get('q', '').strip()
-    # 默认用 all（所有源）：海外服务器豆瓣可能被限流，OpenLibrary/Google 等海外源可用
-    sources = [s.strip() for s in request.args.get('sources', 'all').split(',')]
+    # 默认用海外可用源组合（豆瓣在海外服务器被限流，改用 OpenLibrary/mq59/Amazon 等）
+    default_sources = 'openlibrary,mq59,amazon,baike,google'
+    sources = [s.strip() for s in request.args.get('sources', default_sources).split(',')]
 
     if not query:
         return jsonify({'success': False, 'error': '请输入书名'}), 400
