@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#667eea">
+    <title>书单投票 - 好书大家选</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- 二维码生成库 -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <!-- 登录界面 -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <h1>📚 书单投票</h1>
+            <p class="subtitle">好书大家选</p>
+            <div class="login-form">
+                <label for="userName">请输入您的名字：</label>
+                <input type="text" id="userName" maxlength="10" placeholder="最多10个字" autocomplete="off">
+                <span id="nameError" class="error-msg"></span>
+                <button id="enterBtn" class="btn primary">进入</button>
+            </div>
+            <p class="login-tip">💡 同一设备下次访问将自动登录</p>
+        </div>
+    </div>
+
+    <!-- 主界面 -->
+    <div id="mainApp" class="hidden">
+        <!-- 顶部导航 -->
+        <header class="app-header">
+            <div class="user-info">
+                <span class="user-avatar">👤</span>
+                <span id="currentUserName">用户</span>
+            </div>
+            <nav class="nav-tabs">
+                <button class="nav-tab active" data-tab="create">创建书单</button>
+                <button class="nav-tab" data-tab="vote">参与投票</button>
+                <button class="nav-tab" data-tab="result">投票结果</button>
+                <button class="nav-tab" data-tab="my">我的书单</button>
+            </nav>
+        </header>
+
+        <main class="app-main">
+            <!-- 创建书单 -->
+            <section id="createTab" class="tab-content active">
+                <div class="card">
+                    <h2>📖 创建书单</h2>
+                    <div class="form-group">
+                        <label for="listName">书单名称：</label>
+                        <input type="text" id="listName" placeholder="例如：本月推荐">
+                    </div>
+                    <div class="form-group">
+                        <label>投票数量（每人可选几本）：</label>
+                        <div class="vote-count-selector">
+                            <button class="count-btn" data-count="1">1本</button>
+                            <button class="count-btn" data-count="2">2本</button>
+                            <button class="count-btn active" data-count="3">3本</button>
+                            <input type="number" id="customCount" min="1" max="10" placeholder="自定义">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>选择书籍（至少3本）：</label>
+                        <div class="search-box">
+                            <input type="text" id="searchInput" placeholder="搜索书名..." autocomplete="off">
+                            <button id="searchBtn" class="btn">搜索</button>
+                        </div>
+                        <div id="searchResults" class="search-results"></div>
+                        <div class="selected-books" id="selectedBooks">
+                            <p class="hint">点击搜索结果添加到书单</p>
+                        </div>
+                    </div>
+                    <button id="createListBtn" class="btn primary large">创建书单</button>
+                </div>
+            </section>
+
+            <!-- 参与投票 -->
+            <section id="voteTab" class="tab-content">
+                <div class="card">
+                    <h2>🗳️ 参与投票</h2>
+                    <div class="form-group">
+                        <label>输入书单码或选择书单：</label>
+                        <input type="text" id="listCodeInput" placeholder="输入6位书单码">
+                        <button id="joinByCodeBtn" class="btn">加入投票</button>
+                    </div>
+                    <div id="availableLists" class="available-lists">
+                        <p class="hint">或从下方选择公开书单</p>
+                    </div>
+                </div>
+                <div id="votePanel" class="vote-panel hidden">
+                    <div class="card">
+                        <h3 id="voteListName">书单名称</h3>
+                        <p id="voteRule" class="rule-text"></p>
+                        <div id="voteBooks" class="vote-books"></div>
+                        <button id="submitVoteBtn" class="btn primary large">提交投票</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 投票结果 -->
+            <section id="resultTab" class="tab-content">
+                <div class="card">
+                    <h2>📊 投票结果</h2>
+                    <div class="form-group">
+                        <label>选择书单：</label>
+                        <select id="resultListSelect">
+                            <option value="">请选择书单</option>
+                        </select>
+                    </div>
+                    <div id="resultContent" class="result-content">
+                        <p class="hint">选择书单查看投票结果</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 我的书单 -->
+            <section id="myTab" class="tab-content">
+                <div class="card">
+                    <h2>📚 我的书单</h2>
+                    <div id="myLists" class="my-lists"></div>
+                </div>
+            </section>
+        </main>
+
+        <!-- 二维码弹窗 -->
+        <div id="qrModal" class="modal hidden">
+            <div class="modal-content">
+                <h3>📱 分享书单</h3>
+                <p>扫描二维码或分享书单码：<span id="qrCode"></span></p>
+                <div id="qrcode" class="qrcode-container"></div>
+                <div class="modal-actions">
+                    <button id="copyCodeBtn" class="btn">复制书单码</button>
+                    <button id="closeQrBtn" class="btn">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 书籍详情弹窗 -->
+        <div id="bookDetailModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="book-detail" id="bookDetail"></div>
+                <button id="closeDetailBtn" class="btn">关闭</button>
+            </div>
+        </div>
+
+        <!-- 手动添加书籍模态框 -->
+        <div id="manualAddModal" class="modal hidden">
+            <div class="modal-content">
+                <h3>✏️ 手动添加书籍</h3>
+                <div class="manual-add-form">
+                    <div class="form-group">
+                        <label for="manualTitle">书名</label>
+                        <input type="text" id="manualTitle" placeholder="书名" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="manualAuthor">作者</label>
+                        <input type="text" id="manualAuthor" placeholder="请输入作者">
+                    </div>
+                    <div class="form-group">
+                        <label for="manualDescription">简介（可选）</label>
+                        <textarea id="manualDescription" placeholder="请输入书籍简介" rows="3" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;font-size:0.9rem;resize:vertical;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="manualCover">封面图片（可选）</label>
+                        <input type="file" id="manualCover" accept="image/*" class="file-input">
+                        <div id="coverPreview" class="cover-preview">
+                            <div class="cover-preview-placeholder" id="coverPreviewPlaceholder"></div>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button id="confirmManualAddBtn" class="btn primary">确认添加</button>
+                        <button id="cancelManualAddBtn" class="btn">取消</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 封面大图弹窗 -->
+    <div id="coverModal" class="modal hidden" onclick="if(event.target===this)this.classList.add('hidden')">
+        <div class="modal-content" style="max-width:500px;text-align:center;background:transparent;box-shadow:none;">
+            <img id="coverModalImg" src="" alt="封面大图" style="max-width:100%;max-height:80vh;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+            <button class="btn" style="margin-top:12px;" onclick="document.getElementById('coverModal').classList.add('hidden')">关闭</button>
+        </div>
+    </div>
+
+    <!-- 简介全文弹窗 -->
+    <div id="descriptionModal" class="modal hidden" onclick="if(event.target===this)this.classList.add('hidden')">
+        <div class="modal-content" style="max-width:600px;">
+            <h3 id="descriptionModalTitle"></h3>
+            <div id="descriptionModalText" style="text-align:left;line-height:1.8;color:#2d3748;white-space:pre-wrap;max-height:60vh;overflow-y:auto;padding:10px 0;"></div>
+            <div class="modal-actions">
+                <button class="btn primary" onclick="document.getElementById('descriptionModal').classList.add('hidden')">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
