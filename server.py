@@ -1275,11 +1275,10 @@ def fill_missing_covers(books, max_fill=8):
         title = book.get('title', '')
         if not title or len(title) < 1:
             return idx, None
-        # 优先百度图片
-        covers = search_baidu_image(title)
+        # 海外服务器优先用 Bing 图片（稳定），百度图片作为补充
+        covers = search_bing_image(title)
         if not covers:
-            # Bing兜底
-            covers = search_bing_image(title)
+            covers = search_baidu_image(title)
         if covers:
             return idx, covers[0]
         return idx, None
@@ -1494,7 +1493,8 @@ def search_books():
     各字段击中一个源即可使用，不必强求一个源给全所有信息。
     """
     query = request.args.get('q', '').strip()
-    sources = [s.strip() for s in request.args.get('sources', 'douban_suggest').split(',')]
+    # 默认用 all（所有源）：海外服务器豆瓣可能被限流，OpenLibrary/Google 等海外源可用
+    sources = [s.strip() for s in request.args.get('sources', 'all').split(',')]
 
     if not query:
         return jsonify({'success': False, 'error': '请输入书名'}), 400
